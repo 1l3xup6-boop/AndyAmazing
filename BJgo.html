@@ -10,38 +10,40 @@
     --accent:#22d3ee; --good:#22c55e; --warn:#f59e0b; --bad:#ef4444;
   }
   *{box-sizing:border-box}
-  body{margin:0;background:radial-gradient(900px 600px at 30% -20%, #18234a 0%, var(--bg) 60%) fixed;color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Noto Sans TC,"PingFang TC","Microsoft JhengHei",Arial}
-  .wrap{max-width:780px;margin:0 auto;padding:12px}
-  h1{margin:0 0 8px 0;font-size:20px;line-height:1.25}
-  .sub{color:var(--muted);margin-bottom:10px;font-size:12px}
-  .panel{background:rgba(15,23,42,.88);backdrop-filter:blur(8px);border:1px solid rgba(146,163,184,.25);border-radius:14px;padding:12px}
-  label{font-size:12px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
-  input,select,button{background:#0b1228;color:var(--text);border:1px solid rgba(146,163,184,.3);border-radius:12px;padding:10px 12px;font-size:16px}
+  body{margin:0;background:radial-gradient(900px 600px at 30% -20%, #18234a 0%, var(--bg) 60%) fixed;color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Noto Sans TC,"PingFang TC","Microsoft JhengHei",Arial;font-size:14px}
+  .wrap{max-width:780px;margin:0 auto;padding:8px}
+  h1{margin:0 0 6px 0;font-size:18px;line-height:1.2}
+  .sub{color:var(--muted);margin-bottom:8px;font-size:11px;line-height:1.3}
+  .panel{background:rgba(15,23,42,.88);backdrop-filter:blur(6px);border:1px solid rgba(146,163,184,.25);border-radius:12px;padding:10px}
+  label{font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+  input,select,button{background:#0b1228;color:var(--text);border:1px solid rgba(146,163,184,.3);border-radius:10px;padding:8px 10px;font-size:14px}
   button{cursor:pointer}
-  .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  .cards{display:flex;gap:8px;flex-wrap:wrap}
-  .rank{padding:10px 12px;border:1px dashed rgba(146,163,184,.35);border-radius:12px;min-width:56px;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:manipulation}
-  .rank:active{transform:scale(.98)}
-  .count{font-size:12px;color:var(--muted)}
-  .hand{display:flex;gap:8px;flex-wrap:wrap}
-  .card{width:56px;height:80px;border-radius:12px;border:1px solid rgba(146,163,184,.35);display:grid;place-items:center;background:linear-gradient(180deg,#0f1a39,#0c1429);font-weight:800}
-  .ghost{opacity:.6;font-style:italic}
-  .actions{display:flex;gap:8px;flex-direction:column;margin-top:8px}
-  .act{padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.08);font-weight:700;display:flex;justify-content:space-between;align-items:center}
-  .HIT{border-color:#6366f1}
-  .STAND{border-color:#16a34a}
-  .DOUBLE{border-color:#3b82f6}
-  .SPLIT{border-color:#f59e0b}
-  .SURRENDER{border-color:#ef4444}
-  .ev{font-family:ui-monospace,Menlo,Consolas,monospace}
-  .bar{height:10px;background:#0b1228;border:1px solid rgba(146,163,184,.25);border-radius:999px;overflow:hidden;width:100%}
+  .row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .cards{display:flex;gap:6px;flex-wrap:wrap}
+  .rank{padding:8px 10px;border:1px dashed rgba(146,163,184,.35);border-radius:10px;min-width:50px;min-height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:manipulation;font-size:14px}
+  .rank:active{transform:scale(.97)}
+  .count{font-size:11px;color:var(--muted)}
+  .hand{display:flex;gap:6px;flex-wrap:wrap}
+  .card{width:50px;height:70px;border-radius:10px;border:1px solid rgba(146,163,184,.35);display:grid;place-items:center;background:linear-gradient(180deg,#0f1a39,#0c1429);font-weight:700;font-size:14px}
+  .ghost{opacity:.6;font-style:italic;font-size:13px}
+  .actions{display:flex;gap:6px;flex-direction:column;margin-top:6px}
+  .act{padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.08);font-weight:700;display:flex;justify-content:space-between;align-items:center;font-size:13px}
+  .HIT{border-color:#6366f1;background:rgba(99,102,241,0.1)}
+  .STAND{border-color:#16a34a;background:rgba(22,163,74,0.1)}
+  .DOUBLE{border-color:#3b82f6;background:rgba(59,130,246,0.1)}
+  .SPLIT{border-color:#f59e0b;background:rgba(245,158,11,0.1)}
+  .SURRENDER{border-color:#ef4444;background:rgba(239,68,68,0.1)}
+  .BUST{border-color:#ef4444;background:rgba(239,68,68,0.1)}
+  .ev{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}
+  .bar{height:8px;background:#0b1228;border:1px solid rgba(146,163,184,.25);border-radius:999px;overflow:hidden;width:100%}
   .fill{height:100%;background:linear-gradient(90deg,#06b6d4,#22d3ee)}
-  .footer{color:var(--muted);text-align:center;margin:10px 0 4px 0;font-size:11px}
-  .stack{display:grid;gap:12px}
-  .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-  .kpis > div{background:#0b1228;border:1px solid rgba(146,163,184,.25);border-radius:12px;padding:10px;text-align:center}
+  .footer{color:var(--muted);text-align:center;margin:8px 0 4px 0;font-size:10px}
+  .stack{display:grid;gap:8px}
+  .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+  .kpis > div{background:#0b1228;border:1px solid rgba(146,163,184,.25);border-radius:10px;padding:8px;text-align:center;font-size:12px}
   .sticky-bottom{position:sticky;bottom:8px;z-index:1}
-  .btn-small{padding:8px 10px;font-size:14px;border-radius:10px}
+  .btn-small{padding:6px 8px;font-size:12px;border-radius:8px}
+  #tcDisplay{font-size:12px;margin-top:4px;font-weight:700}
 </style>
 </head>
 <body>
@@ -53,7 +55,7 @@
     <div class="row">
       <div>
         <label>牌靴副數</label><br />
-        <input type="number" id="decks" min="1" max="12" value="6" style="width:110px"/>
+        <input type="number" id="decks" min="1" max="12" value="6" style="width:100px"/>
       </div>
       <div>
         <label>莊家軟17</label><br/>
@@ -78,7 +80,7 @@
       </div>
       <div>
         <label>樣本數</label><br/>
-        <input type="number" id="samples" min="500" max="30000" step="500" value="3000" style="width:120px"/>
+        <input type="number" id="samples" min="500" max="30000" step="500" value="3000" style="width:110px"/>
       </div>
       <div class="row" style="margin-top:4px">
         <button class="btn-small" id="reset">重設</button>
@@ -92,16 +94,16 @@
       <div class="kpis" id="shoeKpis" style="margin-top:6px">
         <div>
           <div class="count">剩餘牌數</div>
-          <div id="leftCnt" style="font-weight:800;font-size:18px">—</div>
+          <div id="leftCnt" style="font-weight:800;font-size:16px">—</div>
         </div>
         <div>
-          <div class="count">高牌指示</div>
-          <div id="hiCnt" style="font-weight:800;font-size:18px">—</div>
+          <div class="count">剩餘高牌</div>
+          <div id="hiCnt" style="font-weight:800;font-size:16px">—</div>
         </div>
       </div>
     </div>
 
-    <div class="row" style="gap:16px">
+    <div class="row" style="gap:12px">
       <div style="flex:1">
         <label>莊家明牌</label>
         <div id="dealerBtns" class="cards" style="margin-top:6px"></div>
@@ -123,8 +125,9 @@
     <div class="sticky-bottom">
       <label>建議策略（依目前剩餘牌組估算 EV）</label>
       <div id="acts" class="actions"></div>
-      <div id="winner" style="margin-top:6px;font-size:22px;font-weight:800">—</div>
-      <div id="detail" class="ev" style="margin-top:4px;color:var(--muted)"></div>
+      <div id="winner" style="margin-top:4px;font-size:18px;font-weight:800">—</div>
+      <div id="detail" class="ev" style="margin-top:2px;color:var(--muted)"></div>
+      <div id="tcDisplay">牌值：—，真數：—</div>
     </div>
   </div>
 
@@ -132,177 +135,120 @@
 </div>
 
 <script>
-const RANKS = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
-function rankVal(r){ if(r==='A') return 11; if(r==='10'||r==='J'||r==='Q'||r==='K') return 10; return parseInt(r,10); }
-function makeCardEl(r){ const d=document.createElement('div'); d.className='card'; d.textContent=r; return d; }
+  const RANKS = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+  function rankVal(r){ if(r==='A') return 11; if(r==='10'||r==='J'||r==='Q'||r==='K') return 10; return parseInt(r,10); }
+  function makeCardEl(r){ const d=document.createElement('div'); d.className='card'; d.textContent=r; return d; }
 
-const seen = Object.fromEntries(RANKS.map(r=>[r,0]));
-let seenHistory = [];
-let dealer = null;
-let player = [];
+  const seen = Object.fromEntries(RANKS.map(r=>[r,0]));
+  let seenHistory = [];
+  let dealer = null;
+  let player = [];
 
-const els = {
-  decks: document.getElementById('decks'),
-  s17: document.getElementById('s17'),
-  das: document.getElementById('das'),
-  surrender: document.getElementById('surrender'),
-  samples: document.getElementById('samples'),
-  seenBtns: document.getElementById('seenBtns'),
-  leftCnt: document.getElementById('leftCnt'),
-  hiCnt: document.getElementById('hiCnt'),
-  dealerBtns: document.getElementById('dealerBtns'),
-  dealerView: document.getElementById('dealerView'),
-  playerBtns: document.getElementById('playerBtns'),
-  playerView: document.getElementById('playerView'),
-  undo: document.getElementById('undo'),
-  clear: document.getElementById('clear'),
-  reset: document.getElementById('reset'),
-  undoSeen: document.getElementById('undoSeen'),
-  acts: document.getElementById('acts'),
-  winner: document.getElementById('winner'),
-  detail: document.getElementById('detail'),
-};
-
-function buildSeenButtons(){
-  els.seenBtns.innerHTML='';
-  RANKS.forEach(r=>{
-    const wrap = document.createElement('div'); wrap.className = 'rank';
-    const label = document.createElement('div'); label.textContent = r;
-    const cnt = document.createElement('div'); cnt.className='count'; cnt.textContent = 'x'+seen[r];
-
-    let pressTimer = null;
-    let longPressed = false;
-    const longMs = 600;
-    function startPress(ev){ ev.preventDefault(); longPressed=false; pressTimer=setTimeout(()=>{ if(seen[r]>0){ seen[r]--; removeLastFromHistory(r); cnt.textContent='x'+seen[r]; render(); } longPressed=true; }, longMs);}
-    function endPress(ev){ ev.preventDefault(); clearTimeout(pressTimer); if(!longPressed){ seen[r]++; seenHistory.push(r); cnt.textContent='x'+seen[r]; render(); } longPressed=false; }
-    wrap.addEventListener('touchstart', startPress, {passive:false});
-    wrap.addEventListener('touchend', endPress);
-    wrap.addEventListener('mousedown', startPress);
-    wrap.addEventListener('mouseup', endPress);
-    wrap.addEventListener('mouseleave', ()=>{ clearTimeout(pressTimer); longPressed=false; });
-    wrap.appendChild(label); wrap.appendChild(cnt);
-    els.seenBtns.appendChild(wrap);
-  });
-}
-
-function removeLastFromHistory(rank){
-  for(let i=seenHistory.length-1;i>=0;i--){ if(seenHistory[i]===rank){ seenHistory.splice(i,1); return; } }
-}
-
-function buildPickers(){
-  els.dealerBtns.innerHTML=''; els.playerBtns.innerHTML='';
-  RANKS.forEach(r=>{
-    const b1=document.createElement('button'); b1.className='rank'; b1.textContent=r; b1.onclick=()=>{ dealer=r; render(); }; els.dealerBtns.appendChild(b1);
-    const b2=document.createElement('button'); b2.className='rank'; b2.textContent=r; b2.onclick=()=>{ player.push(r); render(); }; els.playerBtns.appendChild(b2);
-  });
-}
-
-els.undoSeen.onclick = ()=>{
-  if(seenHistory.length===0){ alert('沒有已出牌紀錄可撤銷'); return; }
-  const last = seenHistory.pop();
-  if(seen[last]>0) seen[last]--;
-  buildSeenButtons();
-  buildPickers();
-  render();
-};
-
-function handTotal(cards){
-  let sum=0, aces=0; for(const c of cards){ if(c==='A'){aces++; sum+=11;} else sum+=rankVal(c); }
-  while(sum>21 && aces>0){ sum-=10; aces--; }
-  const soft = cards.includes('A') && sum<=21 && (()=>{ let base=0,ac=0; for(const c of cards){ if(c==='A'){ac++; base+=1;} else base+=rankVal(c);} return base+10<=21; })();
-  return {total:sum, soft};
-}
-
-function baseShoe(){ const d=parseInt(els.decks.value||6,10); return Object.fromEntries(RANKS.map(r=>[r,4*d])); }
-function shoeAfterSeen(){ const shoe=baseShoe(); for(const r of RANKS){ shoe[r]-=seen[r]; } if(dealer) shoe[dealer]--; for(const r of player){ shoe[r]--; } for(const r of RANKS){ if(shoe[r]<0) shoe[r]=0; } return shoe; }
-function shoeSize(shoe){ return RANKS.reduce((a,r)=>a+shoe[r],0); }
-function drawRandom(shoe){ const n=shoeSize(shoe); if(n<=0) return null; let t=Math.floor(Math.random()*n)+1; for(const r of RANKS){ t-=shoe[r]; if(t<=0){ shoe[r]--; return r; } } return null; }
-function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
-
-function dealerPlay(shoe, up, s17){
-  const hand=[up, drawRandom(shoe)];
-  while(true){
-    const {total, soft}=handTotal(hand);
-    if(total>=17){ if(total>21) return {hand,total}; if(total===17 && soft && s17==='H17'){ hand.push(drawRandom(shoe)); continue; } return {hand,total}; }
-    hand.push(drawRandom(shoe));
-  }
-}
-
-function simulateAction(shoe, playerHand, dealerUp, action, das, s17){
-  const results={win:0,lose:0,tie:0,total:0};
-  const iterations = parseInt(els.samples.value||3000,10);
-  for(let i=0;i<iterations;i++){
-    const sh=clone(shoe); const p=clone(playerHand);
-    let doubled=false;
-    if(action==='HIT'){ p.push(drawRandom(sh)); }
-    else if(action==='STAND'){ }
-    else if(action==='DOUBLE'){ p.push(drawRandom(sh)); doubled=true; }
-    else if(action==='SURRENDER'){ results.lose+=1; continue; }
-    const dres=dealerPlay(sh, dealerUp, s17);
-    const pTotal=handTotal(p).total, dTotal=dres.total;
-    let factor = doubled?2:1;
-    if(pTotal>21){ results.lose+=factor; }
-    else if(dTotal>21 || pTotal>dTotal){ results.win+=factor; }
-    else if(pTotal<dTotal){ results.lose+=factor; }
-    else{ results.tie+=factor; }
-  }
-  const ev = (results.win - results.lose)/iterations;
-  return ev;
-}
-
-function bestAction(){
-  if(!dealer || player.length===0) return {};
-  const shoe=shoeAfterSeen();
-  const actions=['HIT','STAND','DOUBLE','SURRENDER'];
-  const evs = actions.map(a=>[a,simulateAction(shoe,player,dealer,a,els.das.value,els.s17.value)]);
-  evs.sort((a,b)=>b[1]-a[1]);
-  return {res:evs, winner:evs[0]};
-}
-
-function renderEV(){
-  els.acts.innerHTML=''; els.winner.textContent='—'; els.detail.textContent='';
-  if(!dealer || player.length===0) return;
-  const {res, winner}=bestAction(); if(!winner) return;
-  const map={HIT:'✅ 要牌',STAND:'✅ 停牌',DOUBLE:'✅ 加倍',SPLIT:'✅ 分牌',SURRENDER:'✅ 晚投降'};
-  const winnerName=map[winner[0]]||winner[0];
-  els.winner.textContent=winnerName;
-  els.detail.innerHTML=`<button id="showDetail" class="btn-small" style="margin-top:4px">查看詳細 EV</button>`;
-  document.getElementById('showDetail').onclick=()=>{
-    els.acts.innerHTML='';
-    const values=res.map(r=>r[1]);
-    const min=Math.min(...values), max=Math.max(...values);
-    res.forEach(([name,val])=>{
-      const row=document.createElement('div'); row.className='act '+name; row.style.marginTop='6px';
-      const left=document.createElement('div'); left.textContent=name;
-      const right=document.createElement('div'); right.className='ev'; right.textContent=(val>=0?'+':'')+val.toFixed(4);
-      const bar=document.createElement('div'); bar.className='bar'; bar.style.marginTop='6px';
-      const fill=document.createElement('div'); fill.className='fill';
-      const pct=(max===min)?50:((val-min)/(max-min)*100); fill.style.width=pct+'%';
-      bar.appendChild(fill); row.appendChild(left); row.appendChild(right); els.acts.appendChild(row); els.acts.appendChild(bar);
-    });
-    els.detail.innerHTML=`最優動作 EV = ${(winner[1]>=0?'+':'')+winner[1].toFixed(4)}<br><button id="hideDetail" class="btn-small" style="margin-top:4px">隱藏詳細 EV</button>`;
-    document.getElementById('hideDetail').onclick=()=>{ renderEV(); };
+  const els = {
+    decks: document.getElementById('decks'),
+    s17: document.getElementById('s17'),
+    das: document.getElementById('das'),
+    surrender: document.getElementById('surrender'),
+    samples: document.getElementById('samples'),
+    seenBtns: document.getElementById('seenBtns'),
+    leftCnt: document.getElementById('leftCnt'),
+    hiCnt: document.getElementById('hiCnt'),
+    dealerBtns: document.getElementById('dealerBtns'),
+    dealerView: document.getElementById('dealerView'),
+    playerBtns: document.getElementById('playerBtns'),
+    playerView: document.getElementById('playerView'),
+    undo: document.getElementById('undo'),
+    clear: document.getElementById('clear'),
+    reset: document.getElementById('reset'),
+    undoSeen: document.getElementById('undoSeen'),
+    acts: document.getElementById('acts'),
+    winner: document.getElementById('winner'),
+    detail: document.getElementById('detail'),
+    tcDisplay: document.getElementById('tcDisplay'),
+    leftCnt: document.getElementById('leftCnt'),
+    hiCnt: document.getElementById('hiCnt')
   };
-}
 
-function render(){
-  buildSeenButtons();
-  buildPickers();
-  els.playerView.innerHTML=''; player.forEach(r=>els.playerView.appendChild(makeCardEl(r)));
-  els.dealerView.innerHTML=''; if(dealer) els.dealerView.appendChild(makeCardEl(dealer));
-  const shoe=shoeAfterSeen();
-  els.leftCnt.textContent=shoeSize(shoe);
-  els.hiCnt.textContent=RANKS.reduce((a,r)=>a+((r==='10'||r==='J'||r==='Q'||r==='K'||r==='A')?shoe[r]:0),0);
-  renderEV();
-}
+  function buildSeenButtons(){
+    els.seenBtns.innerHTML='';
+    RANKS.forEach(r=>{
+      const wrap = document.createElement('div'); wrap.className = 'rank';
+      const label = document.createElement('div'); label.textContent = r;
+      const cnt = document.createElement('div'); cnt.className='count'; cnt.textContent = 'x'+seen[r];
+      let pressTimer=null,longPressed=false,longMs=600;
+      function startPress(ev){ ev.preventDefault(); longPressed=false; pressTimer=setTimeout(()=>{
+        if(seen[r]>0){ seen[r]--; removeLastFromHistory(r); cnt.textContent='x'+seen[r]; render(); } longPressed=true;
+      },longMs);}
+      function endPress(ev){ ev.preventDefault(); clearTimeout(pressTimer); if(!longPressed){ seen[r]++; seenHistory.push(r); cnt.textContent='x'+seen[r]; render(); } longPressed=false;}
+      wrap.addEventListener('touchstart',startPress,{passive:false});
+      wrap.addEventListener('touchend',endPress);
+      wrap.addEventListener('mousedown',startPress);
+      wrap.addEventListener('mouseup',endPress);
+      wrap.addEventListener('mouseleave',()=>{clearTimeout(pressTimer);longPressed=false;});
+      wrap.appendChild(label); wrap.appendChild(cnt); els.seenBtns.appendChild(wrap);
+    });
+  }
 
-els.undo.onclick=()=>{ if(player.length>0){ player.pop(); render(); } };
-els.clear.onclick=()=>{ player=[]; render(); };
-els.reset.onclick=()=>{ for(const r of RANKS) seen[r]=0; seenHistory=[]; dealer=null; player=[]; render(); };
+  function removeLastFromHistory(rank){
+    for(let i=seenHistory.length-1;i>=0;i--){ if(seenHistory[i]===rank){ seenHistory.splice(i,1); return; } }
+  }
 
-buildSeenButtons();
-buildPickers();
-render();
+  function buildPickers(){
+    els.dealerBtns.innerHTML=''; els.playerBtns.innerHTML='';
+    RANKS.forEach(r=>{
+      const b=document.createElement('button'); b.className='rank'; b.textContent=r; b.onclick=()=>{ dealer=r; render(); }; els.dealerBtns.appendChild(b);
+      const p=document.createElement('button'); p.className='rank'; p.textContent=r; p.onclick=()=>{ player.push(r); render(); }; els.playerBtns.appendChild(p);
+    });
+  }
+
+  els.undoSeen.onclick=()=>{ if(seenHistory.length===0){ alert('沒有已出牌紀錄可撤銷'); return; } const last=seenHistory.pop(); if(seen[last]>0) seen[last]--; buildSeenButtons(); buildPickers(); render(); };
+  els.reset.onclick=()=>{ RANKS.forEach(r=>seen[r]=0); seenHistory=[]; dealer=null; player=[]; buildSeenButtons(); buildPickers(); render(); };
+  els.undo.onclick=()=>{ if(player.length>0){ player.pop(); render(); } };
+  els.clear.onclick=()=>{ player=[]; render(); };
+
+  const moveCN = {HIT:"要牌",STAND:"停牌",DOUBLE:"加倍",SPLIT:"分牌",SURRENDER:"投降",BUST:"爆牌"};
+  function calcBestMove(){
+    if(!dealer||player.length===0) return {move:'—',detail:''};
+    let sum=player.reduce((s,r)=>s+rankVal(r),0);
+    if(sum>21) return {move:'BUST',detail:'爆牌'};
+    if(sum>=17) return {move:'STAND',detail:'點數 >=17'};
+    return {move:'HIT',detail:'點數 <17'};
+  }
+
+  // ===== 計算剩餘牌數、剩餘高牌、真數 =====
+  function calcCount(){
+    let count=0;
+    let totalSeen=0;
+    let highSeen=0;
+    for(const r of RANKS){
+      if(['2','3','4','5','6'].includes(r)) count+=seen[r];
+      else if(['10','J','Q','K','A'].includes(r)) count-=seen[r]; // 高低牌計分保留真數計算
+      totalSeen += seen[r];
+      if(['10','J','Q','K','A'].includes(r)) highSeen+=seen[r];
+    }
+    let totalCards = els.decks.value*52;
+    let remaining = totalCards - totalSeen;
+    let remainingHigh = els.decks.value*4*5 - highSeen; // 每副牌 10,J,Q,K,A 各4張，共5種
+    let trueCount = remaining>0? count/(remaining/52) : 0;
+    els.leftCnt.textContent = remaining;
+    els.hiCnt.textContent = remainingHigh;
+    els.tcDisplay.textContent = `牌值：${count>=0?'+':''}${count}，真數：${trueCount>=0?'+':''}${trueCount.toFixed(2)}`;
+    // 動態顏色
+    els.tcDisplay.style.color = trueCount>0? 'var(--good)':(trueCount<0?'var(--bad)':'var(--muted)');
+  }
+
+  function render(){
+    buildSeenButtons();
+    buildPickers();
+    els.playerView.innerHTML=''; player.forEach(r=>els.playerView.appendChild(makeCardEl(r)));
+    els.dealerView.innerHTML=''; if(dealer) els.dealerView.appendChild(makeCardEl(dealer));
+    const best = calcBestMove();
+    els.winner.textContent = `${moveCN[best.move]} (${best.move})`;
+    els.detail.textContent = best.detail;
+    calcCount();
+  }
+
+  render();
 </script>
 </body>
 </html>
