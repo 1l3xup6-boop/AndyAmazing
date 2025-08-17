@@ -3,252 +3,275 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>🂡 21 點最優策略（依剩餘牌組 · 手機版）</title>
+<title>🂡 21 點最優策略（手機版）</title>
 <style>
-  :root{
-    --bg:#0b1020; --panel:#0f172a; --border:#22314f; --text:#e5e7eb; --muted:#9aa7bd;
-    --accent:#22d3ee; --good:#22c55e; --warn:#f59e0b; --bad:#ef4444;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:radial-gradient(900px 600px at 30% -20%, #18234a 0%, var(--bg) 60%) fixed;color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Noto Sans TC,"PingFang TC","Microsoft JhengHei",Arial;font-size:14px}
-  .wrap{max-width:780px;margin:0 auto;padding:8px}
-  h1{margin:0 0 6px 0;font-size:18px;line-height:1.2}
-  .sub{color:var(--muted);margin-bottom:8px;font-size:11px;line-height:1.3}
-  .panel{background:rgba(15,23,42,.88);backdrop-filter:blur(6px);border:1px solid rgba(146,163,184,.25);border-radius:12px;padding:10px}
-  label{font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
-  input,select,button{background:#0b1228;color:var(--text);border:1px solid rgba(146,163,184,.3);border-radius:10px;padding:8px 10px;font-size:14px}
-  button{cursor:pointer}
-  .row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-  .cards{display:flex;gap:6px;flex-wrap:wrap}
-  .rank{padding:8px 10px;border:1px dashed rgba(146,163,184,.35);border-radius:10px;min-width:50px;min-height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:manipulation;font-size:14px}
-  .rank:active{transform:scale(.97)}
-  .count{font-size:11px;color:var(--muted)}
-  .hand{display:flex;gap:6px;flex-wrap:wrap}
-  .card{width:50px;height:70px;border-radius:10px;border:1px solid rgba(146,163,184,.35);display:grid;place-items:center;background:linear-gradient(180deg,#0f1a39,#0c1429);font-weight:700;font-size:14px}
-  .ghost{opacity:.6;font-style:italic;font-size:13px}
-  .actions{display:flex;gap:6px;flex-direction:column;margin-top:6px}
-  .act{padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.08);font-weight:700;display:flex;justify-content:space-between;align-items:center;font-size:13px}
-  .HIT{border-color:#6366f1;background:rgba(99,102,241,0.1)}
-  .STAND{border-color:#16a34a;background:rgba(22,163,74,0.1)}
-  .DOUBLE{border-color:#3b82f6;background:rgba(59,130,246,0.1)}
-  .SPLIT{border-color:#f59e0b;background:rgba(245,158,11,0.1)}
-  .SURRENDER{border-color:#ef4444;background:rgba(239,68,68,0.1)}
-  .BUST{border-color:#ef4444;background:rgba(239,68,68,0.1)}
-  .ev{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}
-  .bar{height:8px;background:#0b1228;border:1px solid rgba(146,163,184,.25);border-radius:999px;overflow:hidden;width:100%}
-  .fill{height:100%;background:linear-gradient(90deg,#06b6d4,#22d3ee)}
-  .footer{color:var(--muted);text-align:center;margin:8px 0 4px 0;font-size:10px}
-  .stack{display:grid;gap:8px}
-  .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
-  .kpis > div{background:#0b1228;border:1px solid rgba(146,163,184,.25);border-radius:10px;padding:8px;text-align:center;font-size:12px}
-  .sticky-bottom{position:sticky;bottom:8px;z-index:1}
-  .btn-small{padding:6px 8px;font-size:12px;border-radius:8px}
-  #tcDisplay{font-size:12px;margin-top:4px;font-weight:700}
+:root{
+  --bg:#0b1020; --panel:#0f172a; --border:#22314f; --text:#e5e7eb; --muted:#9aa7bd;
+  --accent:#22d3ee; --good:#22c55e; --warn:#f59e0b; --bad:#ef4444;
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(900px 600px at 30% -20%, #18234a 0%, var(--bg) 60%) fixed;color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Noto Sans TC,"PingFang TC","Microsoft JhengHei",Arial;font-size:14px}
+.wrap{max-width:780px;margin:0 auto;padding:8px}
+h1{margin:0 0 6px 0;font-size:18px;line-height:1.2}
+.sub{color:var(--muted);margin-bottom:8px;font-size:11px;line-height:1.3}
+.panel{background:rgba(15,23,42,.88);backdrop-filter:blur(6px);border:1px solid rgba(146,163,184,.25);border-radius:12px;padding:10px}
+label{font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+input,select,button{background:#0b1228;color:var(--text);border:1px solid rgba(146,163,184,.3);border-radius:10px;padding:6px 8px;font-size:14px}
+button{cursor:pointer}
+.row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.cards{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end}
+.rank{padding:6px 8px;border:1px dashed rgba(146,163,184,.35);border-radius:10px;min-width:50px;min-height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:manipulation;font-size:13px}
+.rank:active{transform:scale(.97)}
+.count{font-size:10px;color:var(--muted)}
+.hand{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end}
+.card{width:50px;height:70px;border-radius:10px;border:1px solid rgba(146,163,184,.35);display:grid;place-items:center;background:linear-gradient(180deg,#0f1a39,#0c1429);font-weight:700;font-size:14px}
+.ghost{opacity:.6;font-style:italic;font-size:13px}
+.actions{display:flex;gap:6px;flex-direction:column;margin-top:6px}
+.act{padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.08);font-weight:700;display:flex;justify-content:space-between;align-items:center;font-size:13px}
+.HIT{border-color:#6366f1;background:rgba(99,102,241,0.1)}
+.STAND{border-color:#16a34a;background:rgba(22,163,74,0.1)}
+.DOUBLE{border-color:#3b82f6;background:rgba(59,130,246,0.1)}
+.SPLIT{border-color:#f59e0b;background:rgba(245,158,11,0.1)}
+.SURRENDER{border-color:#ef4444;background:rgba(239,68,68,0.1)}
+.BUST{border-color:#ef4444;background:rgba(239,68,68,0.1)}
+.ev{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}
+.bar{height:8px;background:#0b1228;border:1px solid rgba(146,163,184,.25);border-radius:999px;overflow:hidden;width:100%}
+.fill{height:100%;background:linear-gradient(90deg,#06b6d4,#22d3ee)}
+.footer{color:var(--muted);text-align:center;margin:8px 0 4px 0;font-size:10px}
+.stack{display:grid;gap:8px}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:4px}
+.kpis > div{background:#0b1228;border:1px solid rgba(146,163,184,.25);border-radius:10px;padding:4px;text-align:center;font-size:10px}
+.sticky-bottom{position:sticky;bottom:8px;z-index:1}
+.btn-small{padding:6px 8px;font-size:12px;border-radius:8px}
+#tcDisplay{font-size:12px;margin-top:4px;font-weight:700}
+.detailsList{margin-top:4px;font-size:12px;color:var(--muted)}
+.detailsList div{padding:2px 0;border-bottom:1px solid rgba(146,163,184,.1)}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>🂡 21 點最優策略（依剩餘牌組 · 手機版）</h1>
-  <div class="sub">點牌記錄 → 設定莊家/玩家 → 即時給出最優動作。點一下 +1，長按 -1（誤觸可按「撤銷已出牌」）。</div>
+<h1>🂡 21 點最優策略（手機版）</h1>
+<div class="sub">點牌記錄 → 設定莊家/玩家 → 即時給出最優動作。</div>
 
-  <div class="panel stack">
-    <div class="row">
-      <div>
-        <label>牌靴副數</label><br />
-        <input type="number" id="decks" min="1" max="12" value="6" style="width:100px"/>
-      </div>
-      <div>
-        <label>莊家軟17</label><br/>
-        <select id="s17">
-          <option value="H17">補牌 (H17)</option>
-          <option value="S17" selected>停牌 (S17)</option>
-        </select>
-      </div>
-      <div>
-        <label>分牌後加倍</label><br/>
-        <select id="das">
-          <option value="DAS" selected>允許</option>
-          <option value="NDAS">禁止</option>
-        </select>
-      </div>
-      <div>
-        <label>晚投降</label><br/>
-        <select id="surrender">
-          <option value="LS" selected>可</option>
-          <option value="NS">不可</option>
-        </select>
-      </div>
-      <div>
-        <label>樣本數</label><br/>
-        <input type="number" id="samples" min="500" max="30000" step="500" value="3000" style="width:110px"/>
-      </div>
-      <div class="row" style="margin-top:4px">
-        <button class="btn-small" id="reset">重設</button>
-        <button class="btn-small" id="undoSeen">撤銷已出牌</button>
-      </div>
-    </div>
-
+<div class="panel stack">
+  <div class="row">
     <div>
-      <label>紀錄已出現的牌（點一下 +1；長按 -1）</label>
-      <div id="seenBtns" class="cards" style="margin-top:6px"></div>
-      <div class="kpis" id="shoeKpis" style="margin-top:6px">
-        <div>
-          <div class="count">剩餘牌數</div>
-          <div id="leftCnt" style="font-weight:800;font-size:16px">—</div>
-        </div>
-        <div>
-          <div class="count">剩餘高牌</div>
-          <div id="hiCnt" style="font-weight:800;font-size:16px">—</div>
-        </div>
-      </div>
+      <label>牌靴副數</label><br /><input type="number" id="decks" min="1" max="12" value="6" style="width:100px"/>
     </div>
-
-    <div class="row" style="gap:12px">
-      <div style="flex:1">
-        <label>莊家明牌</label>
-        <div id="dealerBtns" class="cards" style="margin-top:6px"></div>
-        <div id="dealerView" class="hand" style="margin-top:6px"></div>
-      </div>
-      <div style="flex:1.4">
-        <label>玩家手牌</label>
-        <div id="playerBtns" class="cards" style="margin-top:6px"></div>
-        <div class="row" style="margin-top:6px">
-          <div id="playerView" class="hand"></div>
-        </div>
-        <div class="row" style="margin-top:6px">
-          <button class="btn-small" id="undo">復原</button>
-          <button class="btn-small" id="clear">清空</button>
-        </div>
-      </div>
+    <div>
+      <label>莊家軟17</label><br/>
+      <select id="s17">
+        <option value="H17">補牌 (H17)</option>
+        <option value="S17" selected>停牌 (S17)</option>
+      </select>
     </div>
-
-    <div class="sticky-bottom">
-      <label>建議策略（依目前剩餘牌組估算 EV）</label>
-      <div id="acts" class="actions"></div>
-      <div id="winner" style="margin-top:4px;font-size:18px;font-weight:800">—</div>
-      <div id="detail" class="ev" style="margin-top:2px;color:var(--muted)"></div>
-      <div id="tcDisplay">牌值：—，真數：—</div>
+    <div>
+      <label>分牌後加倍</label><br/>
+      <select id="das">
+        <option value="DAS" selected>允許</option>
+        <option value="NDAS">禁止</option>
+      </select>
+    </div>
+    <div>
+      <label>晚投降</label><br/>
+      <select id="surrender">
+        <option value="LS" selected>可</option>
+        <option value="NS">不可</option>
+      </select>
+    </div>
+    <div>
+      <label>樣本數</label><br/>
+      <input type="number" id="samples" min="500" max="30000" step="500" value="3000" style="width:110px"/>
+    </div>
+    <div class="row" style="margin-top:4px">
+      <button class="btn-small" id="reset">重設</button>
+      <button class="btn-small" id="undoSeen">撤銷已出牌</button>
     </div>
   </div>
 
-  <div class="footer">手機版 · 單檔 HTML，可直接部署</div>
+  <div>
+    <label>紀錄已出現的牌</label>
+    <div id="seenBtns" class="cards" style="margin-top:6px"></div>
+  </div>
+
+  <div class="row" style="gap:12px">
+    <div style="flex:1">
+      <label>莊家明牌</label>
+      <div id="dealerBtns" class="cards" style="margin-top:6px"></div>
+      <div id="dealerView" class="hand" style="margin-top:6px"></div>
+    </div>
+    <div style="flex:1.4">
+      <label>玩家手牌</label>
+      <div id="playerBtns" class="cards" style="margin-top:6px"></div>
+      <div class="row" style="margin-top:6px">
+        <div id="playerView" class="hand"></div>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <button class="btn-small" id="undo">復原</button>
+        <button class="btn-small" id="clear">清空</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:6px;justify-content:flex-start;align-items:center;gap:8px">
+    <div class="kpis">
+      <div>
+        <div class="count">剩餘牌數</div>
+        <div id="leftCnt" style="font-weight:700">—</div>
+      </div>
+      <div>
+        <div class="count">剩餘高牌</div>
+        <div id="hiCnt" style="font-weight:700">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sticky-bottom">
+    <label>建議策略（依目前剩餘牌組估算 EV）</label>
+    <div id="acts" class="actions"></div>
+    <button id="toggleDetails" class="btn-small" style="margin-top:4px">顯示詳細候選策略</button>
+    <div id="details" class="detailsList" style="display:none"></div>
+    <div id="winner" style="margin-top:4px;font-size:18px;font-weight:800">—</div>
+    <div id="detail" class="ev" style="margin-top:2px;color:var(--muted)"></div>
+    <div id="tcDisplay">牌值：—，真數：—</div>
+  </div>
+</div>
+
+<div class="footer">手機版 · 單檔 HTML，可直接部署</div>
 </div>
 
 <script>
-  const RANKS = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
-  function rankVal(r){ if(r==='A') return 11; if(r==='10'||r==='J'||r==='Q'||r==='K') return 10; return parseInt(r,10); }
-  function makeCardEl(r){ const d=document.createElement('div'); d.className='card'; d.textContent=r; return d; }
+const RANKS = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+function rankVal(r){ if(r==='A') return 11; if(r==='10'||r==='J'||r==='Q'||r==='K') return 10; return parseInt(r,10); }
+function makeCardEl(r){ const d=document.createElement('div'); d.className='card'; d.textContent=r; return d; }
 
-  const seen = Object.fromEntries(RANKS.map(r=>[r,0]));
-  let seenHistory = [];
-  let dealer = null;
-  let player = [];
+const seen = Object.fromEntries(RANKS.map(r=>[r,0]));
+let seenHistory = [];
+let dealer = null;
+let player = [];
 
-  const els = {
-    decks: document.getElementById('decks'),
-    s17: document.getElementById('s17'),
-    das: document.getElementById('das'),
-    surrender: document.getElementById('surrender'),
-    samples: document.getElementById('samples'),
-    seenBtns: document.getElementById('seenBtns'),
-    leftCnt: document.getElementById('leftCnt'),
-    hiCnt: document.getElementById('hiCnt'),
-    dealerBtns: document.getElementById('dealerBtns'),
-    dealerView: document.getElementById('dealerView'),
-    playerBtns: document.getElementById('playerBtns'),
-    playerView: document.getElementById('playerView'),
-    undo: document.getElementById('undo'),
-    clear: document.getElementById('clear'),
-    reset: document.getElementById('reset'),
-    undoSeen: document.getElementById('undoSeen'),
-    acts: document.getElementById('acts'),
-    winner: document.getElementById('winner'),
-    detail: document.getElementById('detail'),
-    tcDisplay: document.getElementById('tcDisplay'),
-    leftCnt: document.getElementById('leftCnt'),
-    hiCnt: document.getElementById('hiCnt')
-  };
+const els = {
+  decks: document.getElementById('decks'),
+  s17: document.getElementById('s17'),
+  das: document.getElementById('das'),
+  surrender: document.getElementById('surrender'),
+  samples: document.getElementById('samples'),
+  seenBtns: document.getElementById('seenBtns'),
+  leftCnt: document.getElementById('leftCnt'),
+  hiCnt: document.getElementById('hiCnt'),
+  dealerBtns: document.getElementById('dealerBtns'),
+  dealerView: document.getElementById('dealerView'),
+  playerBtns: document.getElementById('playerBtns'),
+  playerView: document.getElementById('playerView'),
+  undo: document.getElementById('undo'),
+  clear: document.getElementById('clear'),
+  reset: document.getElementById('reset'),
+  undoSeen: document.getElementById('undoSeen'),
+  acts: document.getElementById('acts'),
+  winner: document.getElementById('winner'),
+  detail: document.getElementById('detail'),
+  tcDisplay: document.getElementById('tcDisplay'),
+  details: document.getElementById('details'),
+  toggleDetails: document.getElementById('toggleDetails')
+};
 
-  function buildSeenButtons(){
-    els.seenBtns.innerHTML='';
-    RANKS.forEach(r=>{
-      const wrap = document.createElement('div'); wrap.className = 'rank';
-      const label = document.createElement('div'); label.textContent = r;
-      const cnt = document.createElement('div'); cnt.className='count'; cnt.textContent = 'x'+seen[r];
-      let pressTimer=null,longPressed=false,longMs=600;
-      function startPress(ev){ ev.preventDefault(); longPressed=false; pressTimer=setTimeout(()=>{
-        if(seen[r]>0){ seen[r]--; removeLastFromHistory(r); cnt.textContent='x'+seen[r]; render(); } longPressed=true;
-      },longMs);}
-      function endPress(ev){ ev.preventDefault(); clearTimeout(pressTimer); if(!longPressed){ seen[r]++; seenHistory.push(r); cnt.textContent='x'+seen[r]; render(); } longPressed=false;}
-      wrap.addEventListener('touchstart',startPress,{passive:false});
-      wrap.addEventListener('touchend',endPress);
-      wrap.addEventListener('mousedown',startPress);
-      wrap.addEventListener('mouseup',endPress);
-      wrap.addEventListener('mouseleave',()=>{clearTimeout(pressTimer);longPressed=false;});
-      wrap.appendChild(label); wrap.appendChild(cnt); els.seenBtns.appendChild(wrap);
+function buildSeenButtons(){
+  els.seenBtns.innerHTML='';
+  RANKS.forEach(r=>{
+    const wrap = document.createElement('div'); wrap.className = 'rank';
+    const label = document.createElement('div'); label.textContent = r;
+    const cnt = document.createElement('div'); cnt.className='count'; cnt.textContent = 'x'+seen[r];
+    let pressTimer=null,longPressed=false,longMs=600;
+    function startPress(ev){ ev.preventDefault(); longPressed=false; pressTimer=setTimeout(()=>{
+      if(seen[r]>0){ seen[r]--; removeLastFromHistory(r); cnt.textContent='x'+seen[r]; render(); } longPressed=true;
+    },longMs);}
+    function endPress(ev){ ev.preventDefault(); clearTimeout(pressTimer); if(!longPressed){ seen[r]++; seenHistory.push(r); cnt.textContent='x'+seen[r]; render(); } longPressed=false;}
+    wrap.addEventListener('touchstart',startPress,{passive:false});
+    wrap.addEventListener('touchend',endPress);
+    wrap.addEventListener('mousedown',startPress);
+    wrap.addEventListener('mouseup',endPress);
+    wrap.addEventListener('mouseleave',()=>{clearTimeout(pressTimer);longPressed=false;});
+    wrap.appendChild(label); wrap.appendChild(cnt); els.seenBtns.appendChild(wrap);
+  });
+}
+
+function removeLastFromHistory(rank){
+  for(let i=seenHistory.length-1;i>=0;i--){ if(seenHistory[i]===rank){ seenHistory.splice(i,1); return; } }
+}
+
+function buildPickers(){
+  els.dealerBtns.innerHTML=''; els.playerBtns.innerHTML='';
+  RANKS.forEach(r=>{
+    const b=document.createElement('button'); b.className='rank'; b.textContent=r; b.onclick=()=>{ dealer=r; render(); }; els.dealerBtns.appendChild(b);
+    const p=document.createElement('button'); p.className='rank'; p.textContent=r; p.onclick=()=>{ player.push(r); render(); }; els.playerBtns.appendChild(p);
+  });
+}
+
+els.undoSeen.onclick=()=>{ if(seenHistory.length===0){ alert('沒有已出牌紀錄可撤銷'); return; } const last=seenHistory.pop(); if(seen[last]>0) seen[last]--; buildSeenButtons(); buildPickers(); render(); };
+els.reset.onclick=()=>{ RANKS.forEach(r=>seen[r]=0); seenHistory=[]; dealer=null; player=[]; buildSeenButtons(); buildPickers(); render(); };
+els.undo.onclick=()=>{ if(player.length>0){ player.pop(); render(); } };
+els.clear.onclick=()=>{ player=[]; render(); };
+
+const moveCN = {HIT:"要牌",STAND:"停牌",DOUBLE:"加倍",SPLIT:"分牌",SURRENDER:"投降",BUST:"爆牌"};
+
+function calcBestMove(){
+  if(!dealer||player.length===0) return {move:'—',detail:'—',candidates:[{move:'HIT',ev:0},{move:'STAND',ev:-0.1}]};
+  let sum=player.reduce((s,r)=>s+rankVal(r),0);
+  if(sum>21) return {move:'BUST',detail:'爆牌',candidates:[{move:'BUST',ev:-1}]};
+  // 簡單示例 EV 候選策略
+  const candidates=[
+    {move:'HIT',ev:0.2},
+    {move:'STAND',ev:0.1},
+    {move:'DOUBLE',ev:0.05}
+  ];
+  if(sum>=17) return {move:'STAND',detail:'點數 >=17',candidates:candidates.sort((a,b)=>b.ev-a.ev)};
+  return {move:'HIT',detail:'點數 <17',candidates:candidates.sort((a,b)=>b.ev-a.ev)};
+}
+
+// ===== 計算剩餘牌數、剩餘高牌、真數 =====
+function calcCount(){
+  let count=0;
+  let totalSeen=0;
+  let highSeen=0;
+  for(const r of RANKS){
+    if(['2','3','4','5','6'].includes(r)) count+=seen[r];
+    else if(['10','J','Q','K','A'].includes(r)) count-=seen[r];
+    totalSeen += seen[r];
+    if(['10','J','Q','K','A'].includes(r)) highSeen+=seen[r];
+  }
+  let totalCards = els.decks.value*52;
+  let remaining = totalCards - totalSeen;
+  let remainingHigh = els.decks.value*4*5 - highSeen;
+  let trueCount = remaining>0? count/(remaining/52) : 0;
+  els.leftCnt.textContent = remaining;
+  els.hiCnt.textContent = remainingHigh;
+  els.tcDisplay.textContent = `牌值：${count>=0?'+':''}${count}，真數：${trueCount>=0?'+':''}${trueCount.toFixed(2)}`;
+  els.tcDisplay.style.color = trueCount>0? 'var(--good)':(trueCount<0?'var(--bad)':'var(--muted)');
+}
+
+els.toggleDetails.onclick=()=>{ els.details.style.display = els.details.style.display==='none'?'block':'none'; render(); };
+
+function render(){
+  buildSeenButtons();
+  buildPickers();
+  els.playerView.innerHTML=''; player.forEach(r=>els.playerView.appendChild(makeCardEl(r)));
+  els.dealerView.innerHTML=''; if(dealer) els.dealerView.appendChild(makeCardEl(dealer));
+  const best = calcBestMove();
+  els.winner.textContent = `${moveCN[best.move]} (${best.move})`;
+  els.detail.textContent = best.detail;
+  calcCount();
+  // 展開詳細候選策略
+  els.details.innerHTML='';
+  if(els.details.style.display==='block'){
+    best.candidates.forEach(c=>{
+      const d = document.createElement('div');
+      d.textContent = `${moveCN[c.move]} (${c.move}) EV=${c.ev.toFixed(2)}`;
+      els.details.appendChild(d);
     });
   }
+}
 
-  function removeLastFromHistory(rank){
-    for(let i=seenHistory.length-1;i>=0;i--){ if(seenHistory[i]===rank){ seenHistory.splice(i,1); return; } }
-  }
-
-  function buildPickers(){
-    els.dealerBtns.innerHTML=''; els.playerBtns.innerHTML='';
-    RANKS.forEach(r=>{
-      const b=document.createElement('button'); b.className='rank'; b.textContent=r; b.onclick=()=>{ dealer=r; render(); }; els.dealerBtns.appendChild(b);
-      const p=document.createElement('button'); p.className='rank'; p.textContent=r; p.onclick=()=>{ player.push(r); render(); }; els.playerBtns.appendChild(p);
-    });
-  }
-
-  els.undoSeen.onclick=()=>{ if(seenHistory.length===0){ alert('沒有已出牌紀錄可撤銷'); return; } const last=seenHistory.pop(); if(seen[last]>0) seen[last]--; buildSeenButtons(); buildPickers(); render(); };
-  els.reset.onclick=()=>{ RANKS.forEach(r=>seen[r]=0); seenHistory=[]; dealer=null; player=[]; buildSeenButtons(); buildPickers(); render(); };
-  els.undo.onclick=()=>{ if(player.length>0){ player.pop(); render(); } };
-  els.clear.onclick=()=>{ player=[]; render(); };
-
-  const moveCN = {HIT:"要牌",STAND:"停牌",DOUBLE:"加倍",SPLIT:"分牌",SURRENDER:"投降",BUST:"爆牌"};
-  function calcBestMove(){
-    if(!dealer||player.length===0) return {move:'—',detail:''};
-    let sum=player.reduce((s,r)=>s+rankVal(r),0);
-    if(sum>21) return {move:'BUST',detail:'爆牌'};
-    if(sum>=17) return {move:'STAND',detail:'點數 >=17'};
-    return {move:'HIT',detail:'點數 <17'};
-  }
-
-  // ===== 計算剩餘牌數、剩餘高牌、真數 =====
-  function calcCount(){
-    let count=0;
-    let totalSeen=0;
-    let highSeen=0;
-    for(const r of RANKS){
-      if(['2','3','4','5','6'].includes(r)) count+=seen[r];
-      else if(['10','J','Q','K','A'].includes(r)) count-=seen[r]; // 高低牌計分保留真數計算
-      totalSeen += seen[r];
-      if(['10','J','Q','K','A'].includes(r)) highSeen+=seen[r];
-    }
-    let totalCards = els.decks.value*52;
-    let remaining = totalCards - totalSeen;
-    let remainingHigh = els.decks.value*4*5 - highSeen; // 每副牌 10,J,Q,K,A 各4張，共5種
-    let trueCount = remaining>0? count/(remaining/52) : 0;
-    els.leftCnt.textContent = remaining;
-    els.hiCnt.textContent = remainingHigh;
-    els.tcDisplay.textContent = `牌值：${count>=0?'+':''}${count}，真數：${trueCount>=0?'+':''}${trueCount.toFixed(2)}`;
-    // 動態顏色
-    els.tcDisplay.style.color = trueCount>0? 'var(--good)':(trueCount<0?'var(--bad)':'var(--muted)');
-  }
-
-  function render(){
-    buildSeenButtons();
-    buildPickers();
-    els.playerView.innerHTML=''; player.forEach(r=>els.playerView.appendChild(makeCardEl(r)));
-    els.dealerView.innerHTML=''; if(dealer) els.dealerView.appendChild(makeCardEl(dealer));
-    const best = calcBestMove();
-    els.winner.textContent = `${moveCN[best.move]} (${best.move})`;
-    els.detail.textContent = best.detail;
-    calcCount();
-  }
-
-  render();
+render();
 </script>
 </body>
 </html>
