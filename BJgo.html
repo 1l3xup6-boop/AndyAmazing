@@ -19,11 +19,11 @@ label{font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppe
 input,select,button{background:#0b1228;color:var(--text);border:1px solid rgba(146,163,184,.3);border-radius:10px;padding:6px 8px;font-size:14px}
 button{cursor:pointer}
 .row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.cards{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end}
+.cards{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start} /* 改成 flex-start 保持齊高 */
 .rank{padding:6px 8px;border:1px dashed rgba(146,163,184,.35);border-radius:10px;min-width:50px;min-height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:manipulation;font-size:13px}
 .rank:active{transform:scale(.97)}
 .count{font-size:10px;color:var(--muted)}
-.hand{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end}
+.hand{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start} /* 改成 flex-start 保持齊高 */
 .card{width:50px;height:70px;border-radius:10px;border:1px solid rgba(146,163,184,.35);display:grid;place-items:center;background:linear-gradient(180deg,#0f1a39,#0c1429);font-weight:700;font-size:14px}
 .ghost{opacity:.6;font-style:italic;font-size:13px}
 .actions{display:flex;gap:6px;flex-direction:column;margin-top:6px}
@@ -35,17 +35,16 @@ button{cursor:pointer}
 .SURRENDER{border-color:#ef4444;background:rgba(239,68,68,0.1)}
 .BUST{border-color:#ef4444;background:rgba(239,68,68,0.1)}
 .ev{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}
-.bar{height:8px;background:#0b1228;border:1px solid rgba(146,163,184,.25);border-radius:999px;overflow:hidden;width:100%}
+.bar{height:8px;background:#0b1228;border:1px solid rgba(146,163,184,.25);border-radius:999px;overflow:hidden;width:100%;margin-top:2px}
 .fill{height:100%;background:linear-gradient(90deg,#06b6d4,#22d3ee)}
 .footer{color:var(--muted);text-align:center;margin:8px 0 4px 0;font-size:10px}
 .stack{display:grid;gap:8px}
-.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:4px}
-.kpis > div{background:#0b1228;border:1px solid rgba(146,163,184,.25);border-radius:10px;padding:4px;text-align:center;font-size:10px}
+.kpis{display:flex;gap:6px;margin-top:4px;font-size:10px}
+.kpis > div{background:#0b1228;border:1px solid rgba(146,163,184,.25);border-radius:10px;padding:4px;text-align:center;min-width:60px}
 .sticky-bottom{position:sticky;bottom:8px;z-index:1}
 .btn-small{padding:6px 8px;font-size:12px;border-radius:8px}
 #tcDisplay{font-size:12px;margin-top:4px;font-weight:700}
 .detailsList{margin-top:4px;font-size:12px;color:var(--muted)}
-.detailsList div{padding:2px 0;border-bottom:1px solid rgba(146,163,184,.1)}
 </style>
 </head>
 <body>
@@ -92,9 +91,19 @@ button{cursor:pointer}
   <div>
     <label>紀錄已出現的牌</label>
     <div id="seenBtns" class="cards" style="margin-top:6px"></div>
+    <div class="kpis">
+      <div>
+        <div class="count">剩餘牌數</div>
+        <div id="leftCnt" style="font-weight:700">—</div>
+      </div>
+      <div>
+        <div class="count">剩餘高牌</div>
+        <div id="hiCnt" style="font-weight:700">—</div>
+      </div>
+    </div>
   </div>
 
-  <div class="row" style="gap:12px">
+  <div class="row" style="gap:12px;margin-top:6px">
     <div style="flex:1">
       <label>莊家明牌</label>
       <div id="dealerBtns" class="cards" style="margin-top:6px"></div>
@@ -113,24 +122,10 @@ button{cursor:pointer}
     </div>
   </div>
 
-  <div class="row" style="margin-top:6px;justify-content:flex-start;align-items:center;gap:8px">
-    <div class="kpis">
-      <div>
-        <div class="count">剩餘牌數</div>
-        <div id="leftCnt" style="font-weight:700">—</div>
-      </div>
-      <div>
-        <div class="count">剩餘高牌</div>
-        <div id="hiCnt" style="font-weight:700">—</div>
-      </div>
-    </div>
-  </div>
-
   <div class="sticky-bottom">
     <label>建議策略（依目前剩餘牌組估算 EV）</label>
     <div id="acts" class="actions"></div>
-    <button id="toggleDetails" class="btn-small" style="margin-top:4px">顯示詳細候選策略</button>
-    <div id="details" class="detailsList" style="display:none"></div>
+    <div id="details"></div>
     <div id="winner" style="margin-top:4px;font-size:18px;font-weight:800">—</div>
     <div id="detail" class="ev" style="margin-top:2px;color:var(--muted)"></div>
     <div id="tcDisplay">牌值：—，真數：—</div>
@@ -171,8 +166,7 @@ const els = {
   winner: document.getElementById('winner'),
   detail: document.getElementById('detail'),
   tcDisplay: document.getElementById('tcDisplay'),
-  details: document.getElementById('details'),
-  toggleDetails: document.getElementById('toggleDetails')
+  details: document.getElementById('details')
 };
 
 function buildSeenButtons(){
@@ -218,7 +212,6 @@ function calcBestMove(){
   if(!dealer||player.length===0) return {move:'—',detail:'—',candidates:[{move:'HIT',ev:0},{move:'STAND',ev:-0.1}]};
   let sum=player.reduce((s,r)=>s+rankVal(r),0);
   if(sum>21) return {move:'BUST',detail:'爆牌',candidates:[{move:'BUST',ev:-1}]};
-  // 簡單示例 EV 候選策略
   const candidates=[
     {move:'HIT',ev:0.2},
     {move:'STAND',ev:0.1},
@@ -249,7 +242,20 @@ function calcCount(){
   els.tcDisplay.style.color = trueCount>0? 'var(--good)':(trueCount<0?'var(--bad)':'var(--muted)');
 }
 
-els.toggleDetails.onclick=()=>{ els.details.style.display = els.details.style.display==='none'?'block':'none'; render(); };
+// ===== 展示 EV 長條圖 =====
+function renderEVBars(candidates){
+  const container = els.details;
+  container.innerHTML='';
+  candidates.forEach(c=>{
+    const wrapper = document.createElement('div');
+    wrapper.style.display='flex'; wrapper.style.alignItems='center'; wrapper.style.marginTop='2px';
+    const label = document.createElement('div'); label.style.width='50px'; label.textContent = moveCN[c.move];
+    const barContainer = document.createElement('div'); barContainer.className='bar'; barContainer.style.flex='1';
+    const fill = document.createElement('div'); fill.className='fill'; fill.style.width = `${Math.max(c.ev*100,0)}%`;
+    barContainer.appendChild(fill); wrapper.appendChild(label); wrapper.appendChild(barContainer);
+    container.appendChild(wrapper);
+  });
+}
 
 function render(){
   buildSeenButtons();
@@ -260,15 +266,7 @@ function render(){
   els.winner.textContent = `${moveCN[best.move]} (${best.move})`;
   els.detail.textContent = best.detail;
   calcCount();
-  // 展開詳細候選策略
-  els.details.innerHTML='';
-  if(els.details.style.display==='block'){
-    best.candidates.forEach(c=>{
-      const d = document.createElement('div');
-      d.textContent = `${moveCN[c.move]} (${c.move}) EV=${c.ev.toFixed(2)}`;
-      els.details.appendChild(d);
-    });
-  }
+  renderEVBars(best.candidates);
 }
 
 render();
