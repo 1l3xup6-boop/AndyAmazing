@@ -50,7 +50,6 @@
   <div class="sub">點牌記錄 → 設定莊家/玩家 → 即時給出最優動作。點一下 +1，長按 -1（誤觸可按「撤銷已出牌」）。</div>
 
   <div class="panel stack">
-    <!-- 控制列：更適合手機，單列堆疊 -->
     <div class="row">
       <div>
         <label>牌靴副數</label><br />
@@ -87,7 +86,6 @@
       </div>
     </div>
 
-    <!-- 已出現牌按鈕 -->
     <div>
       <label>紀錄已出現的牌（點一下 +1；長按 -1）</label>
       <div id="seenBtns" class="cards" style="margin-top:6px"></div>
@@ -103,7 +101,6 @@
       </div>
     </div>
 
-    <!-- 莊家與玩家區域 -->
     <div class="row" style="gap:16px">
       <div style="flex:1">
         <label>莊家明牌</label>
@@ -123,7 +120,6 @@
       </div>
     </div>
 
-    <!-- 策略輸出（置底吸附，手機更易看） -->
     <div class="sticky-bottom">
       <label>建議策略（依目前剩餘牌組估算 EV）</label>
       <div id="acts" class="actions"></div>
@@ -136,374 +132,177 @@
 </div>
 
 <script>
-  // ===== 公用 =====
-  const RANKS = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
-  function rankVal(r){ if(r==='A') return 11; if(r==='10'||r==='J'||r==='Q'||r==='K') return 10; return parseInt(r,10); }
-  function makeCardEl(r){ const d=document.createElement('div'); d.className='card'; d.textContent=r; return d; }
+const RANKS = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+function rankVal(r){ if(r==='A') return 11; if(r==='10'||r==='J'||r==='Q'||r==='K') return 10; return parseInt(r,10); }
+function makeCardEl(r){ const d=document.createElement('div'); d.className='card'; d.textContent=r; return d; }
 
-  const seen = Object.fromEntries(RANKS.map(r=>[r,0]));
-  let seenHistory = []; // 紀錄每次 +1 的順序，方便撤銷
-  let dealer = null; // upcard rank
-  let player = [];   // array of ranks
+const seen = Object.fromEntries(RANKS.map(r=>[r,0]));
+let seenHistory = [];
+let dealer = null;
+let player = [];
 
-  const els = {
-    decks: document.getElementById('decks'),
-    s17: document.getElementById('s17'),
-    das: document.getElementById('das'),
-    surrender: document.getElementById('surrender'),
-    samples: document.getElementById('samples'),
-    seenBtns: document.getElementById('seenBtns'),
-    leftCnt: document.getElementById('leftCnt'),
-    hiCnt: document.getElementById('hiCnt'),
-    dealerBtns: document.getElementById('dealerBtns'),
-    dealerView: document.getElementById('dealerView'),
-    playerBtns: document.getElementById('playerBtns'),
-    playerView: document.getElementById('playerView'),
-    undo: document.getElementById('undo'),
-    clear: document.getElementById('clear'),
-    reset: document.getElementById('reset'),
-    undoSeen: document.getElementById('undoSeen'),
-    acts: document.getElementById('acts'),
-    winner: document.getElementById('winner'),
-    detail: document.getElementById('detail'),
-  };
+const els = {
+  decks: document.getElementById('decks'),
+  s17: document.getElementById('s17'),
+  das: document.getElementById('das'),
+  surrender: document.getElementById('surrender'),
+  samples: document.getElementById('samples'),
+  seenBtns: document.getElementById('seenBtns'),
+  leftCnt: document.getElementById('leftCnt'),
+  hiCnt: document.getElementById('hiCnt'),
+  dealerBtns: document.getElementById('dealerBtns'),
+  dealerView: document.getElementById('dealerView'),
+  playerBtns: document.getElementById('playerBtns'),
+  playerView: document.getElementById('playerView'),
+  undo: document.getElementById('undo'),
+  clear: document.getElementById('clear'),
+  reset: document.getElementById('reset'),
+  undoSeen: document.getElementById('undoSeen'),
+  acts: document.getElementById('acts'),
+  winner: document.getElementById('winner'),
+  detail: document.getElementById('detail'),
+};
 
-  // 建立按鈕（點一下 +1；長按 -1）
-  function buildSeenButtons(){
-    els.seenBtns.innerHTML='';
-    RANKS.forEach(r=>{
-      const wrap = document.createElement('div'); wrap.className = 'rank';
-      const label = document.createElement('div'); label.textContent = r;
-      const cnt = document.createElement('div'); cnt.className='count'; cnt.textContent = 'x'+seen[r];
+function buildSeenButtons(){
+  els.seenBtns.innerHTML='';
+  RANKS.forEach(r=>{
+    const wrap = document.createElement('div'); wrap.className = 'rank';
+    const label = document.createElement('div'); label.textContent = r;
+    const cnt = document.createElement('div'); cnt.className='count'; cnt.textContent = 'x'+seen[r];
 
-      // 長按與點擊邏輯
-      let pressTimer = null;
-      let longPressed = false;
-      const longMs = 600;
-
-      function startPress(ev){
-        ev.preventDefault();
-        longPressed = false;
-        pressTimer = setTimeout(()=>{
-          // 長按 → 減 1（若有）
-          if(seen[r] > 0){
-            seen[r]--;
-            removeLastFromHistory(r);
-            cnt.textContent = 'x'+seen[r];
-            render();
-          }
-          longPressed = true;
-        }, longMs);
-      }
-      function endPress(ev){
-        ev.preventDefault();
-        clearTimeout(pressTimer);
-        if(!longPressed){
-          // 短按 → 加 1
-          seen[r]++;
-          seenHistory.push(r);
-          cnt.textContent = 'x'+seen[r];
-          render();
-        }
-        longPressed = false;
-      }
-
-      wrap.addEventListener('touchstart', startPress, {passive:false});
-      wrap.addEventListener('touchend', endPress);
-      wrap.addEventListener('mousedown', startPress);
-      wrap.addEventListener('mouseup', endPress);
-      wrap.addEventListener('mouseleave', ()=>{ clearTimeout(pressTimer); longPressed=false; });
-      wrap.appendChild(label); wrap.appendChild(cnt);
-      els.seenBtns.appendChild(wrap);
-    })
-  }
-
-  function removeLastFromHistory(rank){
-    for(let i=seenHistory.length-1;i>=0;i--){ if(seenHistory[i]===rank){ seenHistory.splice(i,1); return; } }
-  }
-
-  function buildPickers(){
-    // Dealer upcard buttons
-    els.dealerBtns.innerHTML='';
-    RANKS.forEach(r=>{
-      const b=document.createElement('button'); b.className='rank'; b.textContent=r; b.onclick=()=>{ dealer=r; render(); }; els.dealerBtns.appendChild(b);
-    });
-    // Player add card buttons
-    els.playerBtns.innerHTML='';
-    RANKS.forEach(r=>{
-      const b=document.createElement('button'); b.className='rank'; b.textContent=r; b.onclick=()=>{ player.push(r); render(); }; els.playerBtns.appendChild(b);
-    });
-  }
-
-  // 撤銷上一次已出牌
-  els.undoSeen.onclick = ()=>{
-    if(seenHistory.length===0){ alert('沒有已出牌紀錄可撤銷'); return; }
-    const last = seenHistory.pop();
-    if(seen[last]>0) seen[last]--;
-    // 重新建立按鈕以更新所有數字顯示
-    buildSeenButtons();
-    buildPickers();
-    render();
-  };
-
-  // 計算工具
-  function handTotal(cards){
-    let sum=0, aces=0; for(const c of cards){ if(c==='A'){aces++; sum+=11;} else sum+=rankVal(c); }
-    while(sum>21 && aces>0){ sum-=10; aces--; }
-    const soft = cards.includes('A') && sum<=21 && (()=>{ let base=0,ac=0; for(const c of cards){ if(c==='A'){ac++; base+=1;} else base+=rankVal(c);} return base+10<=21; })();
-    return {total:sum, soft};
-  }
-
-  function baseShoe(){
-    const d = parseInt(els.decks.value||6,10);
-    const cnt = Object.fromEntries(RANKS.map(r=>[r, 4*d]));
-    return cnt;
-  }
-
-  function shoeAfterSeen(){
-    const shoe = baseShoe();
-    for(const r of RANKS){ shoe[r] -= seen[r]; }
-    // also subtract cards in current hands
-    if(dealer) shoe[dealer]--;
-    for(const r of player){ shoe[r]--; }
-    // sanitize
-    for(const r of RANKS){ if(shoe[r]<0) shoe[r]=0; }
-    return shoe;
-  }
-
-  function shoeSize(shoe){ return RANKS.reduce((a,r)=>a+shoe[r],0); }
-  function drawRandom(shoe){
-    const n = shoeSize(shoe); if(n<=0) return null;
-    let t = Math.floor(Math.random()*n)+1; // 1..n
-    for(const r of RANKS){ t -= shoe[r]; if(t<=0){ shoe[r]--; return r; } }
-    return null;
-  }
-  function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
-
-  // Dealer play to completion
-  function dealerPlay(shoe, up, s17){
-    const hand=[up, drawRandom(shoe)];
-    while(true){
-      const {total, soft} = handTotal(hand);
-      if(total>=17){ if(total>21) return {hand,total}; if(total===17 && soft && s17==='H17'){ hand.push(drawRandom(shoe)); continue; } return {hand,total}; }
-      hand.push(drawRandom(shoe));
-    }
-  }
-
-  function outcomeEV(playerFinal, dealerFinal){
-    const pt = playerFinal.total, dt = dealerFinal.total;
-    if(pt>21) return -1; // player bust
-    if(dt>21) return 1;  // dealer bust
-    if(pt>dt) return 1;
-    if(pt<dt) return -1;
-    return 0; // push
-  }
-
-  // Monte Carlo evaluation for each action
-  function evStand(samples){
-    const shoe0 = shoeAfterSeen();
-    const playerT = handTotal(player);
-    let win=0; let bjPay=0;
-    const naturalPlayer = (player.length===2 && playerT.total===21);
-    for(let i=0;i<samples;i++){
-      const shoe = clone(shoe0);
-      const dealerFinal = dealerPlay(shoe, dealer, els.s17.value);
-      if(naturalPlayer){
-        const dnat = (dealerFinal.total===21 && dealerFinal.hand.length===2);
-        if(dnat) { bjPay += 0; } else { bjPay += 1.5; }
-        continue;
-      }
-      win += outcomeEV(playerT, dealerFinal);
-    }
-    const base = naturalPlayer ? (bjPay/samples) : (win/samples);
-    return base;
-  }
-
-  function randomHitToPolicy(shoe, hand){
-    while(true){
-      const {total, soft} = handTotal(hand);
-      if(total>21) return hand;
-      if(soft){
-        if(total<=17){ hand.push(drawRandom(shoe)); continue; }
-        if(total===18){ return hand; }
-        return hand;
-      } else {
-        if(total<=16){ hand.push(drawRandom(shoe)); continue; }
-        return hand;
-      }
-    }
-  }
-
-  function evHit(samples){
-    const shoe0 = shoeAfterSeen();
-    let totalEV=0;
-    for(let i=0;i<samples;i++){
-      const shoe = clone(shoe0);
-      const newHand = player.slice();
-      newHand.push(drawRandom(shoe));
-      const fin = handTotal(randomHitToPolicy(shoe, newHand));
-      const dealerFinal = dealerPlay(shoe, dealer, els.s17.value);
-      totalEV += outcomeEV(fin, dealerFinal);
-    }
-    return totalEV/samples;
-  }
-
-  function evDouble(samples){
-    if(player.length!==2) return null; // illegal
-    const shoe0 = shoeAfterSeen();
-    let totalEV=0;
-    for(let i=0;i<samples;i++){
-      const shoe = clone(shoe0);
-      const newHand = player.slice();
-      newHand.push(drawRandom(shoe));
-      const fin = handTotal(newHand); // one-card then stand
-      const dealerFinal = dealerPlay(shoe, dealer, els.s17.value);
-      totalEV += 2 * outcomeEV(fin, dealerFinal); // stake doubled
-    }
-    return totalEV/samples;
-  }
-
-  function samePoint(r){ return (r==='10'||r==='J'||r==='Q'||r==='K')? '10' : r; }
-
-  function evSplit(samples){
-    if(player.length!==2) return null;
-    if(samePoint(player[0])!==samePoint(player[1])) return null;
-    const allowDAS = els.das.value==='DAS';
-    const shoe0 = shoeAfterSeen();
-    let totalEV=0;
-    for(let i=0;i<samples;i++){
-      const shoe = clone(shoe0);
-      const rank = player[0];
-      const hand1=[rank, drawRandom(shoe)];
-      const hand2=[rank, drawRandom(shoe)];
-
-      const isA = (rank==='A');
-      let ev1=0, ev2=0;
-      if(isA){
-        const fin1 = handTotal(hand1);
-        const fin2 = handTotal(hand2);
-        const dealerFinal = dealerPlay(clone(shoe), dealer, els.s17.value);
-        ev1 = outcomeEV(fin1, dealerFinal);
-        ev2 = outcomeEV(fin2, dealerFinal);
-      } else {
-        function playOne(h){
-          if(allowDAS){
-            const t = handTotal(h).total;
-            if(t===9||t===10||t===11){ const draw=drawRandom(shoe); h.push(draw); return {fin:handTotal(h), mult:2}; }
-          }
-          const finH = randomHitToPolicy(shoe, h);
-          return {fin:handTotal(finH), mult:1};
-        }
-        const r1 = playOne(hand1), r2 = playOne(hand2);
-        const dealerFinal = dealerPlay(clone(shoe), dealer, els.s17.value);
-        ev1 = r1.mult * outcomeEV(r1.fin, dealerFinal);
-        ev2 = r2.mult * outcomeEV(r2.fin, dealerFinal);
-      }
-      totalEV += (ev1 + ev2);
-    }
-    return totalEV/samples;
-  }
-
-  function evSurrender(){
-    if(els.surrender.value!=='LS') return null; // not allowed
-    const shoe = shoeAfterSeen();
-    let pNat = 0;
-    const remain = shoeSize(shoe);
-    if(dealer==='A'){
-      const tens = shoe['10']+shoe['J']+shoe['Q']+shoe['K'];
-      pNat = tens/Math.max(1,remain);
-    } else if(['10','J','Q','K'].includes(dealer)){
-      pNat = (shoe['A'])/Math.max(1,remain);
-    } else {
-      pNat = 0;
-    }
-    return pNat*(-1) + (1-pNat)*(-0.5);
-  }
-
-  function bestAction(){
-    if(!dealer || player.length===0) return {text:'—', detail:''};
-    const N = parseInt(els.samples.value||3000,10);
-    const res = [];
-    const add=(name, val)=>{ if(val===null) return; res.push([name, val]); };
-    add('STAND', evStand(Math.max(200,Math.floor(N))));
-    add('HIT', evHit(Math.max(200,Math.floor(N))));
-    add('DOUBLE', evDouble(Math.max(200,Math.floor(N/1.2))));
-    add('SPLIT', evSplit(Math.max(200,Math.floor(N/1.2))));
-    add('SURRENDER', evSurrender());
-
-    res.sort((a,b)=>b[1]-a[1]);
-    return { res, winner: res[0] };
-  }
-
-  function renderEV(){
-    els.acts.innerHTML='';
-    els.winner.textContent='—';
-    els.detail.textContent='';
-    if(!dealer || player.length===0){ return; }
-    const {res, winner} = bestAction();
-    const values = res.map(r=>r[1]);
-    const min = Math.min(...values), max = Math.max(...values);
-    res.forEach(([name, val])=>{
-      const row = document.createElement('div'); row.className='act '+name; row.style.marginTop='6px';
-      const left=document.createElement('div'); left.textContent=name;
-      const right=document.createElement('div'); right.className='ev'; right.textContent=(val>=0?'+':'')+val.toFixed(4);
-      const bar = document.createElement('div'); bar.className='bar'; bar.style.marginTop='6px';
-      const fill = document.createElement('div'); fill.className='fill';
-      const pct = (max===min)?50: ( (val-min)/(max-min) * 100 );
-      fill.style.width = pct+'%';
-      bar.appendChild(fill);
-      row.appendChild(left); row.appendChild(right);
-      els.acts.appendChild(row);
-      els.acts.appendChild(bar);
-    });
-    if(winner){
-      const map={HIT:'✅ 要牌 (HIT)',STAND:'✅ 停牌 (STAND)',DOUBLE:'✅ 加倍 (DOUBLE)',SPLIT:'✅ 分牌 (SPLIT)',SURRENDER:'✅ 晚投降 (SURRENDER)'};
-      els.winner.textContent = map[winner[0]] || winner[0];
-      els.detail.textContent = `最優動作 EV = ${(winner[1]>=0?'+':'')+winner[1].toFixed(4)}（以 1 單位注為基準）`;
-    }
-  }
-
-  function render(){
-    // dealer view
-    els.dealerView.innerHTML='';
-    if(dealer) els.dealerView.appendChild(makeCardEl(dealer)); else els.dealerView.innerHTML='<div class="ghost">尚未選擇</div>';
-    // player view
-    els.playerView.innerHTML='';
-    if(player.length===0) els.playerView.innerHTML='<div class="ghost">尚未選擇</div>';
-    player.forEach(r=>els.playerView.appendChild(makeCardEl(r)));
-    // shoe info
-    const shoe = shoeAfterSeen();
-    const left = RANKS.reduce((a,r)=>a+shoe[r],0);
-    els.leftCnt.textContent = `${left}`;
-    // 高牌指示：剩餘 (A + 10/J/Q/K)
-    const high = shoe['A'] + shoe['10'] + shoe['J'] + shoe['Q'] + shoe['K'];
-    els.hiCnt.textContent = `${high}`;
-    clearTimeout(render._t);
-    render._t = setTimeout(renderEV, 60);
-  }
-
-  // 控制鈕
-  els.undo.onclick=()=>{ player.pop(); render(); };
-  els.clear.onclick=()=>{ player = []; render(); };
-  els.reset.onclick=()=>{ for(const r of RANKS){ seen[r]=0; } dealer=null; player=[]; seenHistory=[]; buildSeenButtons(); buildPickers(); render(); };
-  ['decks','s17','das','surrender','samples'].forEach(id=> els[id].addEventListener('change', render));
-
-  // 撤銷上一次已出牌按鈕事件已於上方 buildSeenButtons 宣告之後
-
-  // 手機友善：簡化快捷鍵（可選）
-  const keyMap = {'1':'A','a':'A','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9','0':'10','j':'J','q':'Q','k':'K'};
-  window.addEventListener('keydown',(e)=>{
-    if(e.key==='Backspace'){ player.pop(); render(); return; }
-    if(e.key==='Enter'){ render(); return; }
-    const r=keyMap[e.key]; if(!r) return;
-    if(!dealer) dealer=r; else player.push(r);
-    render();
+    let pressTimer = null;
+    let longPressed = false;
+    const longMs = 600;
+    function startPress(ev){ ev.preventDefault(); longPressed=false; pressTimer=setTimeout(()=>{ if(seen[r]>0){ seen[r]--; removeLastFromHistory(r); cnt.textContent='x'+seen[r]; render(); } longPressed=true; }, longMs);}
+    function endPress(ev){ ev.preventDefault(); clearTimeout(pressTimer); if(!longPressed){ seen[r]++; seenHistory.push(r); cnt.textContent='x'+seen[r]; render(); } longPressed=false; }
+    wrap.addEventListener('touchstart', startPress, {passive:false});
+    wrap.addEventListener('touchend', endPress);
+    wrap.addEventListener('mousedown', startPress);
+    wrap.addEventListener('mouseup', endPress);
+    wrap.addEventListener('mouseleave', ()=>{ clearTimeout(pressTimer); longPressed=false; });
+    wrap.appendChild(label); wrap.appendChild(cnt);
+    els.seenBtns.appendChild(wrap);
   });
+}
 
-  // 初始化
+function removeLastFromHistory(rank){
+  for(let i=seenHistory.length-1;i>=0;i--){ if(seenHistory[i]===rank){ seenHistory.splice(i,1); return; } }
+}
+
+function buildPickers(){
+  els.dealerBtns.innerHTML=''; els.playerBtns.innerHTML='';
+  RANKS.forEach(r=>{
+    const b1=document.createElement('button'); b1.className='rank'; b1.textContent=r; b1.onclick=()=>{ dealer=r; render(); }; els.dealerBtns.appendChild(b1);
+    const b2=document.createElement('button'); b2.className='rank'; b2.textContent=r; b2.onclick=()=>{ player.push(r); render(); }; els.playerBtns.appendChild(b2);
+  });
+}
+
+els.undoSeen.onclick = ()=>{
+  if(seenHistory.length===0){ alert('沒有已出牌紀錄可撤銷'); return; }
+  const last = seenHistory.pop();
+  if(seen[last]>0) seen[last]--;
   buildSeenButtons();
   buildPickers();
   render();
+};
+
+function handTotal(cards){
+  let sum=0, aces=0; for(const c of cards){ if(c==='A'){aces++; sum+=11;} else sum+=rankVal(c); }
+  while(sum>21 && aces>0){ sum-=10; aces--; }
+  const soft = cards.includes('A') && sum<=21 && (()=>{ let base=0,ac=0; for(const c of cards){ if(c==='A'){ac++; base+=1;} else base+=rankVal(c);} return base+10<=21; })();
+  return {total:sum, soft};
+}
+
+function baseShoe(){ const d=parseInt(els.decks.value||6,10); return Object.fromEntries(RANKS.map(r=>[r,4*d])); }
+function shoeAfterSeen(){ const shoe=baseShoe(); for(const r of RANKS){ shoe[r]-=seen[r]; } if(dealer) shoe[dealer]--; for(const r of player){ shoe[r]--; } for(const r of RANKS){ if(shoe[r]<0) shoe[r]=0; } return shoe; }
+function shoeSize(shoe){ return RANKS.reduce((a,r)=>a+shoe[r],0); }
+function drawRandom(shoe){ const n=shoeSize(shoe); if(n<=0) return null; let t=Math.floor(Math.random()*n)+1; for(const r of RANKS){ t-=shoe[r]; if(t<=0){ shoe[r]--; return r; } } return null; }
+function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
+
+function dealerPlay(shoe, up, s17){
+  const hand=[up, drawRandom(shoe)];
+  while(true){
+    const {total, soft}=handTotal(hand);
+    if(total>=17){ if(total>21) return {hand,total}; if(total===17 && soft && s17==='H17'){ hand.push(drawRandom(shoe)); continue; } return {hand,total}; }
+    hand.push(drawRandom(shoe));
+  }
+}
+
+function simulateAction(shoe, playerHand, dealerUp, action, das, s17){
+  const results={win:0,lose:0,tie:0,total:0};
+  const iterations = parseInt(els.samples.value||3000,10);
+  for(let i=0;i<iterations;i++){
+    const sh=clone(shoe); const p=clone(playerHand);
+    let doubled=false;
+    if(action==='HIT'){ p.push(drawRandom(sh)); }
+    else if(action==='STAND'){ }
+    else if(action==='DOUBLE'){ p.push(drawRandom(sh)); doubled=true; }
+    else if(action==='SURRENDER'){ results.lose+=1; continue; }
+    const dres=dealerPlay(sh, dealerUp, s17);
+    const pTotal=handTotal(p).total, dTotal=dres.total;
+    let factor = doubled?2:1;
+    if(pTotal>21){ results.lose+=factor; }
+    else if(dTotal>21 || pTotal>dTotal){ results.win+=factor; }
+    else if(pTotal<dTotal){ results.lose+=factor; }
+    else{ results.tie+=factor; }
+  }
+  const ev = (results.win - results.lose)/iterations;
+  return ev;
+}
+
+function bestAction(){
+  if(!dealer || player.length===0) return {};
+  const shoe=shoeAfterSeen();
+  const actions=['HIT','STAND','DOUBLE','SURRENDER'];
+  const evs = actions.map(a=>[a,simulateAction(shoe,player,dealer,a,els.das.value,els.s17.value)]);
+  evs.sort((a,b)=>b[1]-a[1]);
+  return {res:evs, winner:evs[0]};
+}
+
+function renderEV(){
+  els.acts.innerHTML=''; els.winner.textContent='—'; els.detail.textContent='';
+  if(!dealer || player.length===0) return;
+  const {res, winner}=bestAction(); if(!winner) return;
+  const map={HIT:'✅ 要牌',STAND:'✅ 停牌',DOUBLE:'✅ 加倍',SPLIT:'✅ 分牌',SURRENDER:'✅ 晚投降'};
+  const winnerName=map[winner[0]]||winner[0];
+  els.winner.textContent=winnerName;
+  els.detail.innerHTML=`<button id="showDetail" class="btn-small" style="margin-top:4px">查看詳細 EV</button>`;
+  document.getElementById('showDetail').onclick=()=>{
+    els.acts.innerHTML='';
+    const values=res.map(r=>r[1]);
+    const min=Math.min(...values), max=Math.max(...values);
+    res.forEach(([name,val])=>{
+      const row=document.createElement('div'); row.className='act '+name; row.style.marginTop='6px';
+      const left=document.createElement('div'); left.textContent=name;
+      const right=document.createElement('div'); right.className='ev'; right.textContent=(val>=0?'+':'')+val.toFixed(4);
+      const bar=document.createElement('div'); bar.className='bar'; bar.style.marginTop='6px';
+      const fill=document.createElement('div'); fill.className='fill';
+      const pct=(max===min)?50:((val-min)/(max-min)*100); fill.style.width=pct+'%';
+      bar.appendChild(fill); row.appendChild(left); row.appendChild(right); els.acts.appendChild(row); els.acts.appendChild(bar);
+    });
+    els.detail.innerHTML=`最優動作 EV = ${(winner[1]>=0?'+':'')+winner[1].toFixed(4)}<br><button id="hideDetail" class="btn-small" style="margin-top:4px">隱藏詳細 EV</button>`;
+    document.getElementById('hideDetail').onclick=()=>{ renderEV(); };
+  };
+}
+
+function render(){
+  buildSeenButtons();
+  buildPickers();
+  els.playerView.innerHTML=''; player.forEach(r=>els.playerView.appendChild(makeCardEl(r)));
+  els.dealerView.innerHTML=''; if(dealer) els.dealerView.appendChild(makeCardEl(dealer));
+  const shoe=shoeAfterSeen();
+  els.leftCnt.textContent=shoeSize(shoe);
+  els.hiCnt.textContent=RANKS.reduce((a,r)=>a+((r==='10'||r==='J'||r==='Q'||r==='K'||r==='A')?shoe[r]:0),0);
+  renderEV();
+}
+
+els.undo.onclick=()=>{ if(player.length>0){ player.pop(); render(); } };
+els.clear.onclick=()=>{ player=[]; render(); };
+els.reset.onclick=()=>{ for(const r of RANKS) seen[r]=0; seenHistory=[]; dealer=null; player=[]; render(); };
+
+buildSeenButtons();
+buildPickers();
+render();
 </script>
 </body>
 </html>
